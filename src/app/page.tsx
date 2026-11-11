@@ -12,6 +12,12 @@ import {
   pentagonArea,
   ellipseArea,
 } from "@/lib/areaUtils";
+import triangleImg from "../../public/images/triangle.png";
+import rectangleImg from "../../public/images/rectangle.png";
+import parallelogramImg from "../../public/images/parallelogram.png";
+import rhombusImg from "../../public/images/rhombus.png";
+import pentagonImg from "../../public/images/pentagon.png";
+import ellipseImg from "../../public/images/ellipse.png";
 
 type Entry = {
   name: string;
@@ -24,42 +30,42 @@ const SHAPES = [
   {
     title: "Triangle",
     formula: "A = 0.5 × b × h",
-    image: "/images/triangle.png",
+    image: triangleImg,
     inputs: [{ label: "base" }, { label: "height" }],
     calculate: ([b, h]: number[]) => triangleArea(b, h),
   },
   {
     title: "Rectangle",
     formula: "A = w × l",
-    image: "/images/rectangle.png",
+    image: rectangleImg,
     inputs: [{ label: "width" }, { label: "length" }],
     calculate: ([w, l]: number[]) => rectangleArea(w, l),
   },
   {
     title: "Parallelogram",
     formula: "A = b × h",
-    image: "/images/parallelogram.png",
+    image: parallelogramImg,
     inputs: [{ label: "base" }, { label: "height" }],
     calculate: ([b, h]: number[]) => parallelogramArea(b, h),
   },
   {
     title: "Rhombus",
     formula: "A = 0.5 × d₁ × d₂",
-    image: "/images/rhombus.png",
+    image: rhombusImg,
     inputs: [{ label: "d1" }, { label: "d2" }],
     calculate: ([d1, d2]: number[]) => rhombusArea(d1, d2),
   },
   {
     title: "Pentagon",
     formula: "A = 0.5 × p × a",
-    image: "/images/pentagon.png",
+    image: pentagonImg,
     inputs: [{ label: "perimeter" }, { label: "apothem" }],
     calculate: ([p, a]: number[]) => pentagonArea(p, a),
   },
   {
     title: "Ellipse",
     formula: "A = πab",
-    image: "/images/ellipse.png",
+    image: ellipseImg,
     inputs: [{ label: "a" }, { label: "b" }],
     calculate: ([a, b]: number[]) => ellipseArea(a, b),
   },

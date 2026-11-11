@@ -1,13 +1,13 @@
 "use client";
 
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 import { FormEvent, useId, useState } from "react";
 import { formatArea } from "@/lib/areaUtils";
 
 type Props = {
   title: string;
   formula: string;
-  image: string;
+  image: StaticImageData | string;
   onCalculate: (values: number[]) => number;
   inputs: { label: string }[];
   onResult: (title: string, area: number) => void;
@@ -54,8 +54,8 @@ export default function ShapeCard({
         <Image
           src={image}
           alt={`${title} diagram`}
-          width={200}
-          height={150}
+          width={typeof image === "string" ? 200 : undefined}
+          height={typeof image === "string" ? 150 : undefined}
           className="max-h-28 w-auto object-contain transition-transform duration-300 group-hover:scale-105 drop-shadow-xs"
         />
       </div>
