@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import ShapeCard from "@/components/ShapeCard";
 import CalculationEntry from "@/components/CalculationEntry";
 import {
@@ -11,105 +12,161 @@ import {
   pentagonArea,
   ellipseArea,
 } from "@/lib/areaUtils";
-import Link from "next/link";
 
 type Entry = {
   name: string;
   area: number;
 };
 
+const STORAGE_KEY = "geometry-entries";
+
+const SHAPES = [
+  {
+    title: "Triangle",
+    formula: "A = 0.5 × b × h",
+    image: "/images/triangle.png",
+    inputs: [{ label: "base" }, { label: "height" }],
+    calculate: ([b, h]: number[]) => triangleArea(b, h),
+  },
+  {
+    title: "Rectangle",
+    formula: "A = w × l",
+    image: "/images/rectangle.png",
+    inputs: [{ label: "width" }, { label: "length" }],
+    calculate: ([w, l]: number[]) => rectangleArea(w, l),
+  },
+  {
+    title: "Parallelogram",
+    formula: "A = b × h",
+    image: "/images/parallelogram.png",
+    inputs: [{ label: "base" }, { label: "height" }],
+    calculate: ([b, h]: number[]) => parallelogramArea(b, h),
+  },
+  {
+    title: "Rhombus",
+    formula: "A = 0.5 × d₁ × d₂",
+    image: "/images/rhombus.png",
+    inputs: [{ label: "d1" }, { label: "d2" }],
+    calculate: ([d1, d2]: number[]) => rhombusArea(d1, d2),
+  },
+  {
+    title: "Pentagon",
+    formula: "A = 0.5 × p × a",
+    image: "/images/pentagon.png",
+    inputs: [{ label: "perimeter" }, { label: "apothem" }],
+    calculate: ([p, a]: number[]) => pentagonArea(p, a),
+  },
+  {
+    title: "Ellipse",
+    formula: "A = πab",
+    image: "/images/ellipse.png",
+    inputs: [{ label: "a" }, { label: "b" }],
+    calculate: ([a, b]: number[]) => ellipseArea(a, b),
+  },
+];
+
 export default function Home() {
   const [entries, setEntries] = useState<Entry[]>([]);
+  const [isHydrated, setIsHydrated] = useState(false);
 
-  // ✅ Load from localStorage (only once)
   useEffect(() => {
-    const stored = localStorage.getItem("geometry-entries");
-    if (stored) {
-      setEntries(JSON.parse(stored));
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          setEntries(parsed);
+        }
+      }
+    } catch {
+      // Ignore malformed localStorage data
+    } finally {
+      setIsHydrated(true);
     }
   }, []);
 
-  // ✅ Save to localStorage whenever entries change
   useEffect(() => {
-    localStorage.setItem("geometry-entries", JSON.stringify(entries));
-  }, [entries]);
+    if (!isHydrated) return;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  }, [entries, isHydrated]);
 
   const addEntry = (name: string, area: number) => {
     setEntries((prev) => [...prev, { name, area }]);
   };
+
   const clearEntries = () => {
     setEntries([]);
-    localStorage.removeItem("geometry-entries");
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   return (
     <>
-      <header className="py-5 text-center text-2xl font-bold border-b border-[#888]">
-        <h2>Interactive Geometry Genius</h2>
+      <header className="sticky top-0 z-20 bg-white/85 backdrop-blur-md border-b border-slate-200/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-sm shadow-indigo-600/20 shrink-0">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-5 h-5"
+                aria-hidden="true"
+              >
+                <path d="M3 20h18L12 4Z" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 leading-tight">
+                Interactive Geometry Genius
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-500">
+                Calculate 2D shape areas in cm<sup>2</sup> with instant history
+              </p>
+            </div>
+          </div>
+
+          <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600">
+            6 Shapes &middot; Unit: cm<sup>2</sup>
+          </span>
+        </div>
       </header>
 
-      <main className="container mx-auto mt-5 grid grid-cols-1 md:grid-cols-3 gap-5 p-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 md:col-span-2 gap-6">
-          <ShapeCard
-            title="Triangle"
-            formula="A = 0.5 × b × h"
-            image="/images/triangle.png"
-            inputs={[{ label: "base" }, { label: "height" }]}
-            onCalculate={([b, h]) => triangleArea(b, h)}
-            onResult={addEntry}
-          />
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 items-start">
+          <section
+            aria-label="Geometry shapes"
+            className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 lg:col-span-8 xl:col-span-9 gap-6"
+          >
+            {SHAPES.map((shape) => (
+              <ShapeCard
+                key={shape.title}
+                title={shape.title}
+                formula={shape.formula}
+                image={shape.image}
+                inputs={shape.inputs}
+                onCalculate={shape.calculate}
+                onResult={addEntry}
+              />
+            ))}
+          </section>
 
-          <ShapeCard
-            title="Rectangle"
-            formula="A = w × l"
-            image="/images/rectangle.png"
-            inputs={[{ label: "width" }, { label: "length" }]}
-            onCalculate={([w, l]) => rectangleArea(w, l)}
-            onResult={addEntry}
-          />
-
-          <ShapeCard
-            title="Parallelogram"
-            formula="A = b × h"
-            image="/images/parallelogram.png"
-            inputs={[{ label: "base" }, { label: "height" }]}
-            onCalculate={([b, h]) => parallelogramArea(b, h)}
-            onResult={addEntry}
-          />
-
-          <ShapeCard
-            title="Rhombus"
-            formula="A = 0.5 × d₁ × d₂"
-            image="/images/rhombus.png"
-            inputs={[{ label: "d1" }, { label: "d2" }]}
-            onCalculate={([d1, d2]) => rhombusArea(d1, d2)}
-            onResult={addEntry}
-          />
-
-          <ShapeCard
-            title="Pentagon"
-            formula="A = 0.5 × p × a"
-            image="/images/pentagon.png"
-            inputs={[{ label: "perimeter" }, { label: "apothem" }]}
-            onCalculate={([p, a]) => pentagonArea(p, a)}
-            onResult={addEntry}
-          />
-
-          <ShapeCard
-            title="Ellipse"
-            formula="A = πab"
-            image="/images/ellipse.png"
-            inputs={[{ label: "a" }, { label: "b" }]}
-            onCalculate={([a, b]) => ellipseArea(a, b)}
-            onResult={addEntry}
-          />
+          <div className="lg:col-span-4 xl:col-span-3">
+            <CalculationEntry entries={entries} onClear={clearEntries} />
+          </div>
         </div>
-
-        <CalculationEntry entries={entries} onClear={clearEntries} />
       </main>
-      <footer className="py-5 text-center text-2xl font-bold border-t border-[#888]">
+
+      <footer className="border-t border-slate-200/80 bg-white/80 py-5 px-4 text-center text-sm text-slate-600">
         Created By{" "}
-        <Link href="https://www.wapborhan.com" className="text-red-600">
+        <Link
+          href="https://www.wapborhan.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold text-rose-600 hover:text-rose-700 underline underline-offset-4 decoration-rose-300 hover:decoration-rose-500 transition-colors"
+        >
           Borhan Uddin
         </Link>
       </footer>

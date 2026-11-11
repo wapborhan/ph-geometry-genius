@@ -27,3 +27,8 @@ export function pentagonArea(p: number, a: number) {
 export function ellipseArea(a: number, b: number) {
   return +(Math.PI * a * b).toFixed(2);
 }
+
+export function formatArea(area: number): string {
+  const rounded = Number(area.toFixed(4));
+  return Number.isFinite(rounded) ? rounded.toLocaleString("en-US", { maximumFractionDigits: 4 }) : "0";
+}
